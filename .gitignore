@@ -5,7 +5,6 @@ database
 backups
 back/media
 back/galerie/static/react
-react/bundles
 
 # misc
 .DS_Store
