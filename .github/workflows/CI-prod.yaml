@@ -18,9 +18,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Dependencies
-        run: npm install
+        run: npm install ./react/
       - name: Build for production
-        run: npx webpack --env --mode production
+        run: npx webpack ./react/ --env --mode production
       - name: Commit bundles
         run: |
           git config user.name github-actions
@@ -30,7 +30,7 @@ jobs:
           git commit -m "Build webpack bundles: $LAST_COMMIT"
           git push
   test-prod:
-    needs: lint-prod
+    needs: [lint-prod, build-webpack-prod]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
