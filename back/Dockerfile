@@ -50,33 +50,6 @@ COPY pyproject.toml ./
 # install runtime deps - uses $POETRY_VIRTUALENVS_IN_PROJECT internally
 RUN poetry install --no-dev
 
-# ======================== DEV ENVIRONMENT ========================
-# `development` image is used during development / testing
-FROM python-base as development
-ENV FASTAPI_ENV=development
-WORKDIR $PYSETUP_PATH
-
-# copy in our built poetry + venv
-COPY --from=builder-base $POETRY_HOME $POETRY_HOME
-COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
-
-# quicker install as runtime deps are already installed
-RUN poetry install
-WORKDIR /src
-
-# installation of netcat to check if db is up
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
-    netcat=1.10-46 \
-    redis=5:6.0.16-1+deb11u2 \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY ./entrypoint-dev.sh /usr/local/bin/
-RUN sed -i 's/\r$//g' /usr/local/bin/entrypoint-dev.sh \
-    && chmod +x /usr/local/bin/entrypoint-dev.sh
-
-ENTRYPOINT ["/usr/local/bin/entrypoint-dev.sh"]
-
 # ======================== PROD ENVIRONMENT ========================
 FROM python-base as production
 ENV FASTAPI_ENV=production
@@ -97,7 +70,11 @@ RUN apt-get update \
     redis=5:6.0.16-1+deb11u2 \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy backend files
 COPY . .
+
+# Copy bundles
+COPY ../react/bundles/* ./galerie/static/react
 
 RUN sed -i 's/\r$//g' /src/entrypoint-prod.sh \
     && chmod +x /src/entrypoint-prod.sh

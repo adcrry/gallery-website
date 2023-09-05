@@ -21,7 +21,7 @@ module.exports = (env) => {
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
     },
     output: {
-      path: '../back/galerie/static/react/',
+      path: [__dirname, 'bundles'],
       filename: '[name].bundle.js',
     },
     module: {
