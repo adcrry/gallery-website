@@ -18,14 +18,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Dependencies
-        run: npm install ./react/
+        run: cd react/ && npm install
       - name: Build for production
-        run: npx webpack ./react/ --env --mode production
+        run: npx webpack --env --mode production
       - name: Commit bundles
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add ./back/galerie/static/react/
+          git add ../back/galerie/static/react/
           LAST_COMMIT=$(git log --format="%B" -n 1)
           git commit -m "Build webpack bundles: $LAST_COMMIT"
           git push
