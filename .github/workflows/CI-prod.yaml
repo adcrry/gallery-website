@@ -2,21 +2,21 @@ name: CI-prod
 on:
   push:
     branches:
-      - prod
+      - master
 jobs:
   lint-prod:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install linter
         run: pip install black flake8 isort
       - name: Lint
         run: black . --check && isort . --profile black && flake8 . --config .github/linters/.flake8
   test-prod:
-    needs: lint
+    needs: lint-prod
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build containers
         run: docker compose -f docker-compose.yaml build
       - name: Start containers
@@ -24,16 +24,19 @@ jobs:
       - name: Run tests
         run: docker compose exec -T back python manage.py test
   build-webpack-prod:
-    needs: lint
+    needs: lint-prod
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: npm install
+      - name: Build for production
+        run: npx webpack --env --mode production
       - name: Commit bundles
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add .
+          git add ./back/galerie/static/react/
           LAST_COMMIT=$(git log --format="%B" -n 1)
           git commit -m "Build webpack bundles: $LAST_COMMIT"
           git push

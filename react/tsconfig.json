@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "baseUrl": "./src",
-        "outDir": "/react/",
+        "outDir": "../back/galerie/static/react/",
         "allowJs": true,
         "allowSyntheticDefaultImports": true,
         "isolatedModules": true,
