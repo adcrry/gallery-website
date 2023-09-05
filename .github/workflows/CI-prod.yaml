@@ -12,17 +12,6 @@ jobs:
         run: pip install black flake8 isort
       - name: Lint
         run: black . --check && isort . --profile black && flake8 . --config .github/linters/.flake8
-  test-prod:
-    needs: lint-prod
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build containers
-        run: docker compose -f docker-compose.yaml build
-      - name: Start containers
-        run: docker compose -f docker-compose.yaml up -d
-      - name: Run tests
-        run: docker compose exec -T back python manage.py test
   build-webpack-prod:
     needs: lint-prod
     runs-on: ubuntu-latest
@@ -40,3 +29,14 @@ jobs:
           LAST_COMMIT=$(git log --format="%B" -n 1)
           git commit -m "Build webpack bundles: $LAST_COMMIT"
           git push
+  test-prod:
+    needs: lint-prod
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build containers
+        run: docker compose -f docker-compose.yaml build
+      - name: Start containers
+        run: docker compose -f docker-compose.yaml up -d
+      - name: Run tests
+        run: docker compose exec -T back python manage.py test
