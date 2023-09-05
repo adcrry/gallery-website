@@ -1,5 +1,7 @@
 'use strict';
 
+const path = require('path');
+
 // entryMap is an object containing all entrypoints (files under ./src/pages)
 const fs = require('fs');
 const entryMap = {};
@@ -21,7 +23,7 @@ module.exports = (env) => {
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
     },
     output: {
-      path: [__dirname, 'bundles'],
+      path: path.resolve(__dirname, 'bundles'),
       filename: '[name].bundle.js',
     },
     module: {
