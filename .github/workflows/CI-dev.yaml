@@ -1,0 +1,25 @@
+name: CI-dev
+on:
+  push:
+    branches:
+      - dev
+jobs:
+  lint-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install linter
+        run: pip install black flake8 isort
+      - name: Lint
+        run: black . --check && isort . --profile black && flake8 . --config .github/linters/.flake8
+  test-dev:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build containers
+        run: docker compose build
+      - name: Start containers
+        run: docker compose up -d
+      - name: Run tests
+        run: docker compose exec -T back python manage.py test
