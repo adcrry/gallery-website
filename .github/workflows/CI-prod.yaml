@@ -15,6 +15,8 @@ jobs:
   build-webpack-prod:
     needs: lint-prod
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - name: Install Dependencies
@@ -25,7 +27,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add ./react/
+          git add ./react/bundles
           LAST_COMMIT=$(git log --format="%B" -n 1)
           git commit -m "Build webpack bundles: $LAST_COMMIT"
           git push
