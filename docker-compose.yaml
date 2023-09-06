@@ -16,8 +16,8 @@ services:
 
   back:
     build:
-      context: back
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./back/Dockerfile
       target: production
     command: gunicorn galerie.wsgi:application --bind 0.0.0.0:8000
     depends_on:

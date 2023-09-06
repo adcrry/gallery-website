@@ -45,7 +45,7 @@ RUN curl -sSL https://install.python-poetry.org | python
 # copy project requirement files here to ensure they will be cached.
 WORKDIR $PYSETUP_PATH
 
-COPY pyproject.toml ./
+COPY ./back/pyproject.toml ./
 
 # install runtime deps - uses $POETRY_VIRTUALENVS_IN_PROJECT internally
 RUN poetry install --no-dev
@@ -71,10 +71,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy backend files
-COPY . .
+COPY ./back .
 
 # Copy bundles
-COPY ../react/bundles/* ./galerie/static/react
+COPY ./react/bundles/* ./galerie/static/react
 
 RUN sed -i 's/\r$//g' /src/entrypoint-prod.sh \
     && chmod +x /src/entrypoint-prod.sh

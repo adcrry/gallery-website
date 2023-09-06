@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-docker compose -f docker-compose-prod.yaml stop
+docker compose -f docker-compose.yaml stop
