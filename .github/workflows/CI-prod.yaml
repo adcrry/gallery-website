@@ -23,14 +23,20 @@ jobs:
         run: cd react/ && npm install
       - name: Build for production
         run: cd react/ && npx webpack --env mode=production
-      - name: Commit bundles
+      - name: Commit bundles if necessary
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add ./react/bundles
-          LAST_COMMIT=$(git log --format="%B" -n 1)
-          git commit -m "Build webpack bundles: $LAST_COMMIT"
-          git push
+          if [ -z $(git status --porcelain) ];
+          then
+            echo "Working directory clean. Nothing to commit."
+          else
+            echo "Working directory changed. Committing bundles."
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add ./react/bundles
+            LAST_COMMIT=$(git log --format="%B" -n 1)
+            git commit -m "Build webpack bundles: $LAST_COMMIT"
+            git push
+          fi
   test-prod:
     needs: [lint-prod, build-webpack-prod]
     runs-on: ubuntu-latest
