@@ -31,6 +31,7 @@ urlpatterns = [
     path("galleries/", views.galleries, name="galleries"),
     path("expositions/", views.expositions, name="expositions"),
     path("material/", views.material, name="material"),
+    path("videos/", views.videos, name="videos"),
     path("gestion/", include("gestion.urls")),
     path("api/", include("api.urls")),
     path(

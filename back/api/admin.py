@@ -1,4 +1,4 @@
-from api.models import Face, File, Gallery, Promo, Student, Year
+from api.models import Face, File, Gallery, Promo, Student, Video, Year
 from django.contrib import admin
 
 
@@ -37,6 +37,10 @@ class FaceAdmin(admin.ModelAdmin):
     list_display = ("student", "file")
 
 
+class VideoAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "year", "date", "video_url")
+
+
 # Register your models here.
 admin.site.register(Year, YearAdmin)
 admin.site.register(Promo, PromoAdmin)
@@ -44,3 +48,4 @@ admin.site.register(Student, StudentAdmin)
 admin.site.register(Gallery, GalleryAdmin)
 admin.site.register(File, FileAdmin)
 admin.site.register(Face, FaceAdmin)
+admin.site.register(Video, VideoAdmin)

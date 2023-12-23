@@ -4,6 +4,7 @@ from api.views import (
     change_visibility,
     create_gallery,
     create_promo,
+    create_video,
     create_year,
     delete_gallery,
     delete_pic,
@@ -13,6 +14,7 @@ from api.views import (
     get_galleries,
     get_gallery,
     get_pics,
+    get_videos,
     get_view,
     getRoutes,
     import_users,
@@ -41,4 +43,6 @@ urlpatterns = [
     path("associated_pics/", get_associated_pictures),
     path("expositions/", get_expositions),
     path("get_view", get_view, name="get_view"),
+    path("videos/create/", create_video, name="create_video"),
+    path("videos/get/", get_videos, name="get_videos"),
 ]

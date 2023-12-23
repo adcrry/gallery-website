@@ -5,7 +5,23 @@ from django.db import models
 
 
 class Year(models.Model):
+    year_id = models.IntegerField(default=0)
     name = models.CharField(primary_key=True, max_length=10)
+
+    """
+        Shitty way to add an auto increment field to a model without setting it to primary key
+        Mandatory because I set the year_id as primary key and I can't change it to avoid breaking the database
+    """
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            last_id = Year.objects.all().aggregate(largest=models.Max("year_id"))[
+                "largest"
+            ]
+            if last_id is not None:
+                self.year_id = last_id + 1
+
+        super(Year, self).save(*args, **kwargs)
 
 
 class Promo(models.Model):
@@ -16,10 +32,8 @@ class Promo(models.Model):
 class Student(models.Model):
     user = models.OneToOneField(models2.User(), on_delete=models.PROTECT)
     promo = models.ForeignKey(Promo, on_delete=models.PROTECT)
-    # is_searching = models.BooleanField(default=False)
 
 
-# TODO: Create a year model ?
 class Gallery(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(blank=False, max_length=1000, unique=True)
@@ -64,6 +78,12 @@ class Gallery(models.Model):
             and self.visibility is Gallery.Visibility.PRIVATE
         ):
             return False
+        elif (
+            not user.is_staff
+            and not user.is_superuser
+            and self.year.year_id < user.student.promo.first_year.year_id
+        ):
+            return False
         else:
             return True
 
@@ -75,6 +95,14 @@ class File(models.Model):
     file_full_name = models.CharField(blank=False, max_length=1100)
     link = models.CharField(max_length=10000)
     gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, default=None)
+
+
+class Video(models.Model):
+    name = models.CharField(max_length=1000)
+    slug = models.SlugField(max_length=1000, blank=False, default="")
+    year = models.ForeignKey(Year, on_delete=models.PROTECT, default=None)
+    date = models.DateTimeField(blank=False, default=datetime.now)
+    video_url = models.URLField(max_length=2000)
 
 
 class Reaction(models.Model):

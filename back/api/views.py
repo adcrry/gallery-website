@@ -2,11 +2,12 @@ import os
 
 import galerie.loader as loader
 import galerie.settings as settings
-from api.models import Face, File, Gallery, Student, Year
+from api.models import Face, File, Gallery, Student, Video, Year
 from api.serializers import (
     FileSerializer,
     GallerySerializer,
     PromoSerializer,
+    VideoSerializer,
     YearSerializer,
 )
 from django.contrib.auth.models import User
@@ -83,8 +84,15 @@ def get_view(request):
 
         if request.user.is_authenticated and not request.user.is_superuser:
             galleries = galleries.filter(
-                Q(visibility=Gallery.Visibility.PUBLIC)
-                | Q(visibility=Gallery.Visibility.SCHOOL)
+                (
+                    Q(visibility=Gallery.Visibility.PUBLIC)
+                    | Q(visibility=Gallery.Visibility.SCHOOL)
+                )
+                & Q(
+                    year__year_id__gte=Student.objects.get(
+                        user=request.user
+                    ).promo.first_year.year_id
+                )
             )
 
         galleries = galleries.order_by("-date")
@@ -102,8 +110,15 @@ def get_galleries(request):
         galleries = Gallery.objects.filter(view=Gallery.View.GALLERY).order_by("-date")
     else:
         galleries = Gallery.objects.filter(
-            Q(visibility=Gallery.Visibility.SCHOOL)
-            | Q(visibility=Gallery.Visibility.PUBLIC) & Q(view=Gallery.View.GALLERY)
+            (
+                Q(visibility=Gallery.Visibility.SCHOOL)
+                | Q(visibility=Gallery.Visibility.PUBLIC) & Q(view=Gallery.View.GALLERY)
+            )
+            & Q(
+                year__year_id__gte=Student.objects.get(
+                    user=request.user
+                ).promo.first_year.year_id
+            )
         ).order_by("-date")
     serializer = GallerySerializer(galleries, many=True)
     return Response(serializer.data)
@@ -134,21 +149,7 @@ def get_gallery(request):
     if gallery.count() == 0:
         return Response(status=status.HTTP_404_NOT_FOUND)
     # check if request user is allowed to see this gallery
-    if not request.user.is_authenticated and (
-        not gallery[0].visibility == Gallery.Visibility.PUBLIC
-    ):
-        return Response(
-            {
-                "status": "error",
-                "message": "Vous n'êtes pas autorisé à voir cette galerie.",
-            },
-            status=403,
-        )
-    elif (
-        not request.user.is_staff
-        and not request.user.is_superuser
-        and gallery[0].visibility is Gallery.Visibility.PRIVATE
-    ):
+    if not gallery.first().can_user_access(request.user):
         return Response(
             {
                 "status": "error",
@@ -169,21 +170,7 @@ def get_pics(request):
             {"status": "error", "message": "Cette galerie n'existe pas."}, status=404
         )
     # check if request user is allowed to see this gallery
-    if not request.user.is_authenticated and (
-        not gallery[0].visibility == Gallery.Visibility.PUBLIC
-    ):
-        return Response(
-            {
-                "status": "error",
-                "message": "Vous n'êtes pas autorisé à voir cette galerie.",
-            },
-            status=403,
-        )
-    elif (
-        not request.user.is_staff
-        and not request.user.is_superuser
-        and gallery[0].visibility is Gallery.Visibility.PRIVATE
-    ):
+    if not gallery.first().can_user_access(request.user):
         return Response(
             {
                 "status": "error",
@@ -234,6 +221,49 @@ def create_gallery(request):
             status=400,
         )
 
+    return Response(serializer.data)
+
+
+@api_view(["POST"])
+@permission_classes([IsAdminUser])
+def create_video(request):
+    if "year" not in request.data:
+        request.data["year"] = Year.objects.last().pk
+    request.data["slug"] = slugify(request.data["name"])
+    if request.data["name"] == "":
+        return Response(
+            {
+                "status": "error",
+                "message": "Le nom de la galerie ne peut pas être vide.",
+            },
+            status=400,
+        )
+    if request.data["video_url"] == "":
+        return Response(
+            {
+                "status": "error",
+                "message": "Merci de spécifier un lien vers la vidéo.",
+            },
+            status=400,
+        )
+    if Video.objects.filter(slug=request.data["slug"]).exists():
+        return Response(
+            {"status": "error", "message": "Une vidéo avec ce nom existe déjà."},
+            status=400,
+        )
+    serializer = VideoSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=False):
+        serializer.save()
+    else:
+        Response(serializer.errors, status=400)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_videos(request):
+    videos = Video.objects.all()
+    serializer = VideoSerializer(videos, many=True)
     return Response(serializer.data)
 
 

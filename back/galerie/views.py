@@ -66,6 +66,10 @@ def material(request):
     return render(request, "material.html")
 
 
+def videos(request):
+    return render(request, "videos.html")
+
+
 @user_passes_test(lambda u: u.is_superuser)
 def add_promo(request):
     order = "nom, prénom, mail"

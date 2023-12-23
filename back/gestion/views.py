@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render
 from galerie.loader import load_zip_into_gallery
+from galerie.utils import get_random_string
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -16,7 +17,7 @@ def gallery_view(request, slug=""):
     if request.method == "POST" and request.FILES["zipfile"]:
         file = request.FILES["zipfile"]
         fs = FileSystemStorage()
-        filename = fs.save(file.name, file)
+        filename = fs.save(get_random_string(8) + ".zip", file)
         uploaded_file_url = fs.url(filename)
 
         gal = Gallery.objects.get(slug=slug)

@@ -1,6 +1,6 @@
 import random
 
-from api.models import File, Gallery, Material, Promo, Reaction, Student, Year
+from api.models import File, Gallery, Material, Promo, Reaction, Student, Video, Year
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
@@ -86,3 +86,9 @@ class PromoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Promo
         fields = ["name", "first_year"]
+
+
+class VideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Video
+        fields = ["name", "slug", "year", "video_url"]

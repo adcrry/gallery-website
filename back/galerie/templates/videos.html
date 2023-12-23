@@ -1,0 +1,29 @@
+{% load static %}
+{% include "head.html" %}
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Inter' rel='stylesheet'>
+</head>
+<body>
+    <!--Header-->
+    {% include "header.html" %}
+
+    <!--Content-->
+    <div class="content">
+
+        <!--Main Content-->
+        <div class="content-main">
+
+            <div id="Basic"></div>
+
+        </div><!--End of Main Content-->
+
+    </div><!--End of Content-->
+
+    <script>
+        window.react_mount = document.getElementById('Basic');
+    </script>
+    <script src="{% static 'react/videos.bundle.js' %}"></script>
+
+</body><!--End of Body-->
+
+</html><!--End of Document-->
